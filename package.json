@@ -1,0 +1,23 @@
+{
+  "name": "license-everything",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "git@github.com:jfilter/license-everything.git",
+  "author": "Johannes Filter <hi@jfilter.de>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "license-checker": "^16.0.0"
+  },
+  "scripts": {
+    "start":
+      "babel-node index.js /users/filter/code/frag-den-staat-app/ test.json"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  },
+  "babel": {
+    "presets": ["env"]
+  }
+}
