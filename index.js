@@ -73,7 +73,7 @@ function readFileIntoString(path) {
 async function processJson(json, ignore) {
   const results = await Promise.all(
     Object.keys(json)
-      .filter(x => !x.contains(ignore))
+      .filter(x => !x.includes(ignore))
       .map(async k => {
         const v = json[k];
         const publisher = v.publisher ? ` by ${v.publisher}` : "";
