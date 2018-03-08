@@ -4,6 +4,7 @@ const fs = require("fs");
 const args = process.argv.slice(2);
 const source = args[0];
 const dest = args[1];
+const ignore = args[2];
 
 checker.init(
   {
@@ -13,7 +14,7 @@ checker.init(
     if (err) {
       console.error("could get data from license-checker: " + err);
     } else {
-      processJson(json).then(data => {
+      processJson(json, ignore).then(data => {
         const json = JSON.stringify(data);
         fs.writeFile(dest, json, "utf8", () => true);
       });
@@ -69,28 +70,30 @@ function readFileIntoString(path) {
   });
 }
 
-async function processJson(json) {
+async function processJson(json, ignore) {
   const results = await Promise.all(
-    Object.keys(json).map(async k => {
-      const v = json[k];
-      const publisher = v.publisher ? ` by ${v.publisher}` : "";
-      const email = v.email ? ` (${v.email})` : "";
-      const repository = v.repository ? `Repository: ${v.repository} ` : "";
-      const url = v.url ? `Url: ${v.url} ` : "";
-      const licenses = ` licensed under ${v.licenses}. `;
-      let text = [k, publisher, email, licenses, repository, url].join("");
+    Object.keys(json)
+      .filter(x => !x.contains(ignore))
+      .map(async k => {
+        const v = json[k];
+        const publisher = v.publisher ? ` by ${v.publisher}` : "";
+        const email = v.email ? ` (${v.email})` : "";
+        const repository = v.repository ? `Repository: ${v.repository} ` : "";
+        const url = v.url ? `Url: ${v.url} ` : "";
+        const licenses = ` licensed under ${v.licenses}. `;
+        let text = [k, publisher, email, licenses, repository, url].join("");
 
-      if (v.licenseFile) {
-        try {
-          const fixedLicenseFile = await fixLicenseFile(v.licenseFile);
-          const fileAsText = await readFileIntoString(fixedLicenseFile);
-          text += fileAsText + "\n";
-        } catch (error) {
-          // console.error(error);
+        if (v.licenseFile) {
+          try {
+            const fixedLicenseFile = await fixLicenseFile(v.licenseFile);
+            const fileAsText = await readFileIntoString(fixedLicenseFile);
+            text += fileAsText + "\n";
+          } catch (error) {
+            // console.error(error);
+          }
         }
-      }
-      return await text;
-    })
+        return text;
+      })
   );
   return results;
 }
